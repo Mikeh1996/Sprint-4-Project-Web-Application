@@ -28,11 +28,17 @@ for col in selected_filters:
     selected_values = st.multiselect(f"Select {col}:", options, default=options)
     filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
 
-# Create bar chart
-bar_chart = px.bar(filtered_data["brand"].value_counts().reset_index(),
-                    x="index", y="brand",
-                    labels={"index": "Brand", "brand": "Count"},
-                    title="Most Popular Car Brands")
+# Get brand counts and reset index
+brand_counts = filtered_data["brand"].value_counts().reset_index()
+brand_counts.columns = ["brand", "count"]  # Renaming columns for clarity
+
+# Create the bar chart
+bar_chart = px.bar(brand_counts, 
+                   x="brand", 
+                   y="count", 
+                   labels={"brand": "Brand", "count": "Number of Listings"},
+                   title="Most Popular Car Brands")
+
 st.plotly_chart(bar_chart)
 
 # ---- HISTOGRAM: DAYS LISTED ----
