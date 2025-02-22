@@ -59,8 +59,8 @@ st.write("This chart shows how long cars remain listed before being sold.")
 # Checkbox to filter out outliers (unique key)
 remove_outliers_hist = st.checkbox("Remove outliers for this chart", value=False, key="outlier_hist")
 
-# Dropdowns for filtering with "All" option
-histogram_filters = ["brand", "cylinders", "model_year", "fuel", "transmission", "type"]
+# Dropdowns for filtering with "All" option (Added `model`)
+histogram_filters = ["brand", "model", "cylinders", "model_year", "fuel", "transmission", "type"]
 selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters)
 
 # Apply filters dynamically
