@@ -1,104 +1,67 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
+import plotly.express as px
+
+# ---- LOAD CLEANED DATA ----
+carsDF = pd.read_csv("cleaned_vehicles_us.csv")
 
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
-st.write("Welcome to the car sales data dashboard.")
+st.write("This interactive dashboard provides insights into car sales data.")
 
-# ---- NOTEBOOK GOAL ----
-st.header("Project Overview")
-st.write("""
-- **Clean** the dataset (check for duplicates, missing values, and ensure correct data types).
-- **Perform statistical analysis** to find key metrics.
-- **Visualize insights** using various plots.
-""")
-
-# ---- LOAD DATASET ----
+# ---- DATASET OVERVIEW ----
 st.header("Dataset Overview")
-
-# Upload dataset option (for flexibility)
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
-
-if uploaded_file is not None:
-    carsDF = pd.read_csv(uploaded_file)
-else:
-    # Default dataset location (update this path if needed)
-    carsDF = pd.read_csv("vehicles_us.csv")
-
-# Display the first few rows
-st.write("### Raw Data Preview:")
 st.write(carsDF.head())
 
+# ---- BAR CHART: MOST POPULAR CARS ----
+st.header("Most Popular Cars by Brand")
+st.write("This chart shows the most listed car brands.")
 
-# ---- FUNCTION FOR DATA ANALYSIS ----
-def analyze_data(df):
-    st.subheader("Basic Dataset Information")
-    buffer = df.info(buf=None)
-    st.text(buffer)  # Streamlit does not display df.info() directly, so we print it as text
+# Dropdowns for filtering
+filter_options = ["model_year", "model", "condition", "cylinders", "fuel", "transmission", "type", "paint_color", "is_4wd"]
+selected_filters = st.multiselect("Select filters to refine the chart:", filter_options)
 
-    st.subheader("Missing Values:")
-    st.write(df.isna().sum())
+# Apply filters dynamically
+filtered_data = carsDF.copy()
+for col in selected_filters:
+    options = filtered_data[col].dropna().unique().tolist()
+    selected_values = st.multiselect(f"Select {col}:", options, default=options)
+    filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
 
-    st.subheader("Duplicate Entries:")
-    st.write(df.duplicated().sum())
+# Create bar chart
+bar_chart = px.bar(filtered_data["brand"].value_counts().reset_index(),
+                    x="index", y="brand",
+                    labels={"index": "Brand", "brand": "Count"},
+                    title="Most Popular Car Brands")
+st.plotly_chart(bar_chart)
 
-# ---- RUN DATA ANALYSIS ----
-analyze_data(carsDF)
+# ---- HISTOGRAM: DAYS LISTED ----
+st.header("Days Listed Histogram")
+st.write("This chart shows how long cars remain listed before being sold.")
 
+# Dropdowns for filtering
+histogram_filters = ["brand", "cylinders", "model_year", "fuel", "transmission", "type"]
+selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters)
 
-# ---- DATA CLEANING ----
-st.header("Data Cleaning")
-st.write("Correcting missing values and data types...")
+# Apply filters dynamically
+filtered_data_hist = carsDF.copy()
+for col in selected_histogram_filters:
+    options = filtered_data_hist[col].dropna().unique().tolist()
+    selected_values = st.multiselect(f"Select {col}:", options, default=options)
+    filtered_data_hist = filtered_data_hist[filtered_data_hist[col].isin(selected_values)]
 
-# Data Corrections
-carsDF[['model_year', 'cylinders', 'is_4wd', 'odometer']] = (
-    carsDF[['model_year', 'cylinders', 'is_4wd', 'odometer']]
-    .fillna(0)
-    .astype(int)
-)
-carsDF['paint_color'] = carsDF['paint_color'].fillna('unknown')
-carsDF['date_posted'] = pd.to_datetime(carsDF['date_posted'], format='%Y-%m-%d')
+# Create histogram
+histogram = px.histogram(filtered_data_hist, x="days_listed", nbins=30,
+                         labels={"days_listed": "Days Listed"},
+                         title="Distribution of Days Listed")
+st.plotly_chart(histogram)
 
-st.success("Data Cleaning Complete ✅")
+# ---- SCATTERPLOT: PRICE VS ODOMETER ----
+st.header("Price vs. Mileage")
+st.write("This scatterplot examines the relationship between price and mileage.")
 
-
-# ---- VISUALIZATIONS ----
-st.header("Data Visualizations")
-
-# --- Price Distribution ---
-st.subheader("Price Distribution (95th Quantile)")
-fig, ax = plt.subplots(figsize=(10,5))
-sns.histplot(carsDF['price'], bins=50, kde=True, ax=ax)
-ax.set_xlim(0, carsDF['price'].quantile(0.95))
-ax.set_xlabel("Price")
-ax.set_ylabel("Count")
-ax.set_title("Distribution of Car Prices (95th Quantile)")
-st.pyplot(fig)
-
-# --- Mileage vs. Price ---
-st.subheader("Mileage vs. Price")
-fig, ax = plt.subplots(figsize=(10,5))
-sns.scatterplot(x=carsDF['odometer'], y=carsDF['price'], ax=ax)
-ax.set_xlim(0, carsDF['odometer'].max())
-ax.set_xlabel("Mileage (Odometer)")
-ax.set_ylabel("Price")
-ax.set_title("Mileage vs. Price")
-st.pyplot(fig)
-
-# --- Top 10 Most Common Car Brands ---
-st.subheader("Top 10 Most Common Car Brands")
-fig, ax = plt.subplots(figsize=(10,5))
-carsDF['model'].value_counts().head(10).plot(kind='bar', ax=ax)
-ax.set_xlabel("Brand")
-ax.set_ylabel("Number of Listings")
-ax.set_title("Top 10 Most Common Car Brands")
-plt.xticks(rotation=45)
-st.pyplot(fig)
-
-st.success("Visualization Complete ✅")
-
-# ---- END OF APP ----
-st.write("### 🚀 Interactive dashboard ready! Explore the dataset above.")
-
+# Create scatterplot
+scatter_plot = px.scatter(carsDF, x="odometer", y="price", color="brand",
+                          labels={"odometer": "Mileage (Odometer)", "price": "Price"},
+                          title="Price vs. Mileage Scatterplot")
+st.plotly_chart(scatter_plot)
