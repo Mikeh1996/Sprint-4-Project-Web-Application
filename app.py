@@ -3,7 +3,15 @@ import pandas as pd
 import plotly.express as px
 
 # ---- LOAD CLEANED DATA ----
-carsDF = pd.read_csv("cleaned_used_car_data.csv")
+carsDF = pd.read_csv("cleaned_vehicles_us.csv")
+
+# ---- DATA CLEANING & PREPROCESSING ----
+# Ensure 'days_listed' is numeric and fill missing values
+carsDF["days_listed"] = carsDF["days_listed"].fillna(0).astype(int)
+
+# Filter out extreme outliers for better visualization (Optional)
+carsDF = carsDF[(carsDF["price"] > 500) & (carsDF["price"] < carsDF["price"].quantile(0.99))]
+carsDF = carsDF[(carsDF["odometer"] < carsDF["odometer"].quantile(0.99))]
 
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
@@ -17,16 +25,19 @@ st.write(carsDF.head())
 st.header("Most Popular Cars by Brand")
 st.write("This chart shows the most listed car brands.")
 
-# Dropdowns for filtering
+# Dropdowns for filtering with "All" option
 filter_options = ["model_year", "model", "condition", "cylinders", "fuel", "transmission", "type", "paint_color", "is_4wd"]
 selected_filters = st.multiselect("Select filters to refine the chart:", filter_options)
 
-# Apply filters dynamically
+# Apply filters dynamically with "All" option
 filtered_data = carsDF.copy()
 for col in selected_filters:
-    options = filtered_data[col].dropna().unique().tolist()
-    selected_values = st.multiselect(f"Select {col}:", options, default=options)
-    filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
+    options = sorted(filtered_data[col].dropna().unique().tolist())  # Get unique values
+    options.insert(0, "All")  # Add "All" option at the top
+    selected_values = st.multiselect(f"Select {col}:", options, default="All")
+
+    if "All" not in selected_values:
+        filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
 
 # Get brand counts and reset index
 brand_counts = filtered_data["brand"].value_counts().reset_index()
@@ -45,16 +56,19 @@ st.plotly_chart(bar_chart)
 st.header("Days Listed Histogram")
 st.write("This chart shows how long cars remain listed before being sold.")
 
-# Dropdowns for filtering
+# Dropdowns for filtering with "All" option
 histogram_filters = ["brand", "cylinders", "model_year", "fuel", "transmission", "type"]
 selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters)
 
-# Apply filters dynamically
+# Apply filters dynamically with "All" option
 filtered_data_hist = carsDF.copy()
 for col in selected_histogram_filters:
-    options = filtered_data_hist[col].dropna().unique().tolist()
-    selected_values = st.multiselect(f"Select {col}:", options, default=options)
-    filtered_data_hist = filtered_data_hist[filtered_data_hist[col].isin(selected_values)]
+    options = sorted(filtered_data_hist[col].dropna().unique().tolist())  
+    options.insert(0, "All")  
+    selected_values = st.multiselect(f"Select {col}:", options, default="All")
+
+    if "All" not in selected_values:
+        filtered_data_hist = filtered_data_hist[filtered_data_hist[col].isin(selected_values)]
 
 # Create histogram
 histogram = px.histogram(filtered_data_hist, x="days_listed", nbins=30,
