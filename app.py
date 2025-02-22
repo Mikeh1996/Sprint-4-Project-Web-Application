@@ -7,7 +7,7 @@ carsDF = pd.read_csv("cleaned_used_car_data.csv")
 
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
-st.write("This interactive dashboard provides insights into car sales data. Every chart is filtered by metric for example: Brand or Brand and type. Every chart has an option to include outliers.")
+st.write("This interactive dashboard provides insights into car sales data. Every chart is filtered by metric for example: Brand or Brand and type.")
 
 # ---- DATASET OVERVIEW ----
 st.header("Dataset Overview")
@@ -15,10 +15,10 @@ st.write(carsDF.head())
 
 # ---- BAR CHART: MOST POPULAR CARS ----
 st.header("Most Popular Cars")
-st.write("This chart shows the most listed cars.")
+st.write("This chart shows the most listed cars by metric.")
 
-# Checkbox to filter out outliers
-remove_outliers_bar = st.checkbox("Remove outliers for this chart", value=False)
+# Checkbox to filter out outliers (unique key)
+remove_outliers_bar = st.checkbox("Remove outliers for this chart", value=False, key="outlier_bar")
 
 # Dropdowns for filtering with "All" option
 filter_options = ["model_year", "model", "condition", "cylinders", "fuel", "transmission", "type", "paint_color", "is_4wd"]
@@ -56,8 +56,8 @@ st.plotly_chart(bar_chart)
 st.header("Days Listed Histogram")
 st.write("This chart shows how long cars remain listed before being sold.")
 
-# Checkbox to filter out outliers
-remove_outliers_hist = st.checkbox("Remove outliers for this chart", value=False)
+# Checkbox to filter out outliers (unique key)
+remove_outliers_hist = st.checkbox("Remove outliers for this chart", value=False, key="outlier_hist")
 
 # Dropdowns for filtering with "All" option
 histogram_filters = ["brand", "cylinders", "model_year", "fuel", "transmission", "type"]
@@ -88,8 +88,8 @@ st.plotly_chart(histogram)
 st.header("Price vs. Mileage")
 st.write("This scatterplot examines the relationship between price and mileage.")
 
-# Checkbox to filter out outliers
-remove_outliers_scatter = st.checkbox("Remove outliers for this chart", value=False)
+# Checkbox to filter out outliers (unique key)
+remove_outliers_scatter = st.checkbox("Remove outliers for this chart", value=False, key="outlier_scatter")
 
 # Dropdown to select brand (with "All" option)
 brand_options = sorted(carsDF["brand"].dropna().unique().tolist())  # Get unique brands
@@ -112,4 +112,3 @@ scatter_plot = px.scatter(filtered_scatter, x="odometer", y="price", color="bran
                           labels={"odometer": "Mileage (Odometer)", "price": "Price"},
                           title=f"Price vs. Mileage ({selected_brand if selected_brand != 'All' else 'All Brands'})")
 st.plotly_chart(scatter_plot)
-
