@@ -5,32 +5,32 @@ import plotly.express as px
 # ---- LOAD CLEANED DATA ----
 carsDF = pd.read_csv("cleaned_used_car_data.csv")
 
-# ---- DATA CLEANING & PREPROCESSING ----
-# Ensure 'days_listed' is numeric and fill missing values
-carsDF["days_listed"] = carsDF["days_listed"].fillna(0).astype(int)
-
-# Filter out extreme outliers for better visualization (Optional)
-carsDF = carsDF[(carsDF["price"] > 500) & (carsDF["price"] < carsDF["price"].quantile(0.99))]
-carsDF = carsDF[(carsDF["odometer"] < carsDF["odometer"].quantile(0.99))]
-
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
-st.write("This interactive dashboard provides insights into car sales data.")
+st.write("This interactive dashboard provides insights into car sales data. Every chart is filtered by metric for example: Brand or Brand and type. Every chart has an option to include outliers.")
 
 # ---- DATASET OVERVIEW ----
 st.header("Dataset Overview")
 st.write(carsDF.head())
 
 # ---- BAR CHART: MOST POPULAR CARS ----
-st.header("Most Popular Cars by Brand")
-st.write("This chart shows the most listed car brands.")
+st.header("Most Popular Cars")
+st.write("This chart shows the most listed cars.")
+
+# Checkbox to filter out outliers
+remove_outliers_bar = st.checkbox("Remove outliers for this chart", value=False)
 
 # Dropdowns for filtering with "All" option
 filter_options = ["model_year", "model", "condition", "cylinders", "fuel", "transmission", "type", "paint_color", "is_4wd"]
 selected_filters = st.multiselect("Select filters to refine the chart:", filter_options)
 
-# Apply filters dynamically with "All" option
+# Apply filters dynamically
 filtered_data = carsDF.copy()
+
+# Apply outlier removal if checked
+if remove_outliers_bar:
+    filtered_data = filtered_data[(filtered_data["price"] > 500) & (filtered_data["price"] < filtered_data["price"].quantile(0.99))]
+
 for col in selected_filters:
     options = sorted(filtered_data[col].dropna().unique().tolist())  # Get unique values
     options.insert(0, "All")  # Add "All" option at the top
@@ -56,12 +56,20 @@ st.plotly_chart(bar_chart)
 st.header("Days Listed Histogram")
 st.write("This chart shows how long cars remain listed before being sold.")
 
+# Checkbox to filter out outliers
+remove_outliers_hist = st.checkbox("Remove outliers for this chart", value=False)
+
 # Dropdowns for filtering with "All" option
 histogram_filters = ["brand", "cylinders", "model_year", "fuel", "transmission", "type"]
 selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters)
 
-# Apply filters dynamically with "All" option
+# Apply filters dynamically
 filtered_data_hist = carsDF.copy()
+
+# Apply outlier removal if checked
+if remove_outliers_hist:
+    filtered_data_hist = filtered_data_hist[filtered_data_hist["days_listed"] < filtered_data_hist["days_listed"].quantile(0.99)]
+
 for col in selected_histogram_filters:
     options = sorted(filtered_data_hist[col].dropna().unique().tolist())  
     options.insert(0, "All")  
@@ -80,8 +88,28 @@ st.plotly_chart(histogram)
 st.header("Price vs. Mileage")
 st.write("This scatterplot examines the relationship between price and mileage.")
 
+# Checkbox to filter out outliers
+remove_outliers_scatter = st.checkbox("Remove outliers for this chart", value=False)
+
+# Dropdown to select brand (with "All" option)
+brand_options = sorted(carsDF["brand"].dropna().unique().tolist())  # Get unique brands
+brand_options.insert(0, "All")  # Add "All" option at the top
+selected_brand = st.selectbox("Select a brand:", brand_options)
+
+# Apply filters dynamically
+filtered_scatter = carsDF.copy()
+
+# Apply outlier removal if checked
+if remove_outliers_scatter:
+    filtered_scatter = filtered_scatter[(filtered_scatter["price"] > 500) & (filtered_scatter["price"] < filtered_scatter["price"].quantile(0.99))]
+    filtered_scatter = filtered_scatter[filtered_scatter["odometer"] < filtered_scatter["odometer"].quantile(0.99)]
+
+if selected_brand != "All":
+    filtered_scatter = filtered_scatter[filtered_scatter["brand"] == selected_brand]
+
 # Create scatterplot
-scatter_plot = px.scatter(carsDF, x="odometer", y="price", color="brand",
+scatter_plot = px.scatter(filtered_scatter, x="odometer", y="price", color="brand",
                           labels={"odometer": "Mileage (Odometer)", "price": "Price"},
-                          title="Price vs. Mileage Scatterplot")
+                          title=f"Price vs. Mileage ({selected_brand if selected_brand != 'All' else 'All Brands'})")
 st.plotly_chart(scatter_plot)
+
