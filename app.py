@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # ---- LOAD CLEANED DATA ----
-carsDF = pd.read_csv("cleaned_vehicles_us.csv")
+carsDF = pd.read_csv("cleaned_used_car_data.csv")
 
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
