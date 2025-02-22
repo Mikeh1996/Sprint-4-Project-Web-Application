@@ -7,22 +7,22 @@ carsDF = pd.read_csv("cleaned_used_car_data.csv")
 
 # ---- STREAMLIT APP TITLE ----
 st.title("Car Sales Analysis Web App")
-st.write("This interactive dashboard provides insights into car sales data. Every chart is filtered by metric for example: Brand or Brand and type.")
+st.write("This interactive dashboard provides insights into car sales data.")
 
 # ---- DATASET OVERVIEW ----
 st.header("Dataset Overview")
 st.write(carsDF.head())
 
 # ---- BAR CHART: MOST POPULAR CARS ----
-st.header("Most Popular Cars")
-st.write("This chart shows the most listed cars by metric.")
+st.header("Most Popular Cars by Brand")
+st.write("This chart shows the most listed car brands.")
 
 # Checkbox to filter out outliers (unique key)
 remove_outliers_bar = st.checkbox("Remove outliers for this chart", value=False, key="outlier_bar")
 
 # Dropdowns for filtering with "All" option
 filter_options = ["model_year", "model", "condition", "cylinders", "fuel", "transmission", "type", "paint_color", "is_4wd"]
-selected_filters = st.multiselect("Select filters to refine the chart:", filter_options)
+selected_filters = st.multiselect("Select filters to refine the chart:", filter_options, key="filter_bar")
 
 # Apply filters dynamically
 filtered_data = carsDF.copy()
@@ -34,7 +34,7 @@ if remove_outliers_bar:
 for col in selected_filters:
     options = sorted(filtered_data[col].dropna().unique().tolist())  # Get unique values
     options.insert(0, "All")  # Add "All" option at the top
-    selected_values = st.multiselect(f"Select {col}:", options, default="All")
+    selected_values = st.multiselect(f"Select {col}:", options, default="All", key=f"multiselect_{col}_bar")
 
     if "All" not in selected_values:
         filtered_data = filtered_data[filtered_data[col].isin(selected_values)]
@@ -61,7 +61,7 @@ remove_outliers_hist = st.checkbox("Remove outliers for this chart", value=False
 
 # Dropdowns for filtering with "All" option (Added `model`)
 histogram_filters = ["brand", "model", "cylinders", "model_year", "fuel", "transmission", "type"]
-selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters)
+selected_histogram_filters = st.multiselect("Select filters for days listed histogram:", histogram_filters, key="filter_hist")
 
 # Apply filters dynamically
 filtered_data_hist = carsDF.copy()
@@ -73,7 +73,7 @@ if remove_outliers_hist:
 for col in selected_histogram_filters:
     options = sorted(filtered_data_hist[col].dropna().unique().tolist())  
     options.insert(0, "All")  
-    selected_values = st.multiselect(f"Select {col}:", options, default="All")
+    selected_values = st.multiselect(f"Select {col}:", options, default="All", key=f"multiselect_{col}_hist")
 
     if "All" not in selected_values:
         filtered_data_hist = filtered_data_hist[filtered_data_hist[col].isin(selected_values)]
@@ -94,7 +94,7 @@ remove_outliers_scatter = st.checkbox("Remove outliers for this chart", value=Fa
 # Dropdown to select brand (with "All" option)
 brand_options = sorted(carsDF["brand"].dropna().unique().tolist())  # Get unique brands
 brand_options.insert(0, "All")  # Add "All" option at the top
-selected_brand = st.selectbox("Select a brand:", brand_options)
+selected_brand = st.selectbox("Select a brand:", brand_options, key="brand_scatter")
 
 # Apply filters dynamically
 filtered_scatter = carsDF.copy()
@@ -112,3 +112,4 @@ scatter_plot = px.scatter(filtered_scatter, x="odometer", y="price", color="bran
                           labels={"odometer": "Mileage (Odometer)", "price": "Price"},
                           title=f"Price vs. Mileage ({selected_brand if selected_brand != 'All' else 'All Brands'})")
 st.plotly_chart(scatter_plot)
+
