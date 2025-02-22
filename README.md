@@ -6,7 +6,7 @@ This project is inspired by my passion for data analysis, digital marketing, and
 This project also serves as practice in software engineering tasks, including working with Streamlit, handling datasets, and deploying applications to a cloud service.
 
 ## Problem Statement
-The used car market is vast, and making sense of trends—such as pricing patterns, mileage distribution, and popular car brands can be challenging. This project aims to analyze a dataset of car advertisements, extract key insights, and visualize them interactively through a web-based dashboard.
+The used car market is vast, and making sense of trends such as pricing patterns, mileage distribution, and popular car brands can be challenging. This project aims to analyze a dataset of car advertisements, extract key insights, and visualize them interactively through a web-based dashboard.
 
 By doing this, we seek to answer:
 
