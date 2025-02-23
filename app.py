@@ -29,7 +29,7 @@ filtered_data = carsDF.copy()
 
 # Apply outlier removal if checked
 if remove_outliers_bar:
-    filtered_data = filtered_data[(filtered_data["price"] > 500) & (filtered_data["price"] < filtered_data["price"].quantile(0.99))]
+    filtered_data = filtered_data[(filtered_data["price"] > 500) & (filtered_data["price"] < filtered_data["price"].quantile(0.95))]
 
 for col in selected_filters:
     options = sorted(filtered_data[col].dropna().unique().tolist())  # Get unique values
@@ -102,7 +102,7 @@ filtered_scatter = carsDF.copy()
 # Apply outlier removal if checked
 if remove_outliers_scatter:
     filtered_scatter = filtered_scatter[(filtered_scatter["price"] > 500) & (filtered_scatter["price"] < filtered_scatter["price"].quantile(0.99))]
-    filtered_scatter = filtered_scatter[filtered_scatter["odometer"] < filtered_scatter["odometer"].quantile(0.99)]
+    filtered_scatter = filtered_scatter[filtered_scatter["odometer"] < filtered_scatter["odometer"].quantile(0.95)]
 
 if selected_brand != "All":
     filtered_scatter = filtered_scatter[filtered_scatter["brand"] == selected_brand]
