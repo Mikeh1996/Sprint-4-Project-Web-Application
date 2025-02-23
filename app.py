@@ -68,7 +68,7 @@ filtered_data_hist = carsDF.copy()
 
 # Apply outlier removal if checked
 if remove_outliers_hist:
-    filtered_data_hist = filtered_data_hist[filtered_data_hist["days_listed"] < filtered_data_hist["days_listed"].quantile(0.99)]
+    filtered_data_hist = filtered_data_hist[filtered_data_hist["days_listed"] < filtered_data_hist["days_listed"].quantile(0.95)]
 
 for col in selected_histogram_filters:
     options = sorted(filtered_data_hist[col].dropna().unique().tolist())  
