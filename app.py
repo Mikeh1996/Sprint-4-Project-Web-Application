@@ -80,8 +80,11 @@ for col in selected_histogram_filters:
 
 # Create histogram
 histogram = px.histogram(filtered_data_hist, x="days_listed", nbins=30,
-                         labels={"days_listed": "Days Listed", "y": "Number of Listings"},
+                         labels={"days_listed": "Days Listed"},
                          title="Distribution of Days Listed")
+
+histogram.update_layout(yaxis_title="Number of Listings")  # Manually update Y-axis label
+
 st.plotly_chart(histogram)
 
 # ---- SCATTERPLOT: PRICE VS ODOMETER ----
