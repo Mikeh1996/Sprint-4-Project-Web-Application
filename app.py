@@ -80,7 +80,7 @@ for col in selected_histogram_filters:
 
 # Create histogram
 histogram = px.histogram(filtered_data_hist, x="days_listed", nbins=30,
-                         labels={"days_listed": "Days Listed"},
+                         labels={"days_listed": "Days Listed", "count": "Number of Listings"},
                          title="Distribution of Days Listed")
 st.plotly_chart(histogram)
 
